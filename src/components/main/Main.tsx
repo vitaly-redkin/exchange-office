@@ -20,7 +20,7 @@ export class Main extends React.PureComponent<RouteComponentProps<IDummyProps>> 
         <div className='app-header-contaner'>
           <AppHeader />
         </div>
-        <div>
+        <div className='pt-4'>
           <Routes />
         </div>
       </div>

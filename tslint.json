@@ -49,7 +49,8 @@
     "trailing-comma": false,
     "no-trailing-whitespace": false,
     "prefer-object-spread": false,
-    "no-debugger": false
+    "no-debugger": false,
+    "max-func-body-length": false
   },
   "rulesDirectory": [
     "node_modules/tslint-lines-between-class-members"
