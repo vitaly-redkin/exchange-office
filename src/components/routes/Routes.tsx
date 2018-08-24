@@ -17,7 +17,7 @@ class Routes extends React.PureComponent<RouteComponentProps<IDummyProps>> {
     return (
       <Switch>
         <Route path={AppRoutes.Home} component={Home} exact={true} />
-        <Route path={AppRoutes.Admin} component={Admin} />
+        <Route path={AppRoutes.Admin} component={Admin} exact={true} />
         <Redirect to={AppRoutes.Home} />
       </Switch>
     );

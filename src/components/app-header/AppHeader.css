@@ -1,0 +1,49 @@
+.app-header
+{
+    background-color: #222;
+}
+
+.app-header-logo
+{
+    width: 64px;
+    height: 64px;
+}
+
+.app-header-left
+{
+}
+
+.app-header-title
+{
+    color: white;
+    text-align: center;
+    align-items: center;
+    width: 100%;
+}
+
+.app-header-right
+{
+    width: 240px;
+}
+
+.app-header-right div
+{
+    text-align: right;
+    width: 100%;
+}
+
+.app-header-active-link
+{
+    color: white !important;
+}
+
+.nav-link
+{
+    color: #91DC5A;
+    font-size: 1.25rem;
+}
+
+a.nav-link:hover
+{
+    color: white;
+}
