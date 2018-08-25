@@ -7,10 +7,10 @@ import { connect } from 'react-redux';
 import { Container, Row, Col, Alert } from 'reactstrap';
 
 import { actionCreators } from '../../store/CurrencyHandler';
+import { IApplicationState } from '../../store';
 import { CurrencyInfo } from '../../model/CurrencyInfo';
 import { Settings } from '../../model/Settings';
 import * as CurrencyManager from '../../model/CurrencyManager';
-import { IApplicationState } from '../../store';
 import { formatRate, formatAmount } from '../../util/Util';
 
 import './Home.css';
@@ -45,7 +45,7 @@ class Home extends React.PureComponent<HomeProps> {
   }
 
   /**
-   * Rencers table with currencies.
+   * Renders table with currencies.
    */
   private renderTable(): JSX.Element {
     return (
@@ -58,6 +58,10 @@ class Home extends React.PureComponent<HomeProps> {
         </Row>
 
         {this.props.currencies.map((c: CurrencyInfo, index: number) => {
+          if (c.currency === this.props.settings.baseCurrency) {
+            return null;
+          }
+
           const rowClassName: string = 
             (index % 2 === 0 ? 'home-table-row-even' : 'home-table-row-odd');
           const amountClass: string = (
@@ -84,10 +88,10 @@ class Home extends React.PureComponent<HomeProps> {
    */
   private get alertColor(): string {
     return (
-      this.props.settings.rateRefreshInterval <= 0  ? 
+      this.props.lastError !== '' ? 
+        'danger' : 
+      this.props.settings.rateRefreshInterval <= 0 || this.props.lastUpdatedAt === '' ? 
         'warning' :
-      this.props.lastError ? 
-        'error' : 
         'success'
     );
   }
@@ -112,7 +116,7 @@ class Home extends React.PureComponent<HomeProps> {
           'Exchange rates has not been updated yet.'
         }
         &nbsp;
-        <span className={amountClass}>{`We have ${amount} ${baseCurrency} left.`}</span>
+        <span className={amountClass}>{`We have ${formatAmount(amount)} ${baseCurrency} left.`}</span>
       </div>
     );
   }

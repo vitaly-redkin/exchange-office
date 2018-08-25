@@ -3,6 +3,7 @@
  */
 
 import { CurrencyInfo } from './CurrencyInfo';
+import { Settings } from './Settings';
 
 /**
  * Updates the given currency amount.
@@ -51,4 +52,59 @@ export function getCurrencyInfo(
     currency: string
 ): CurrencyInfo | undefined {
     return allCurrencies.find(c => c.currency === currency);
+}
+
+/**
+ * Imports fetched exchange rates into the application.
+ * 
+ * @param rates JSON objecs with fetched rates
+ * @param currencies Application currencies
+ * @param settings Application settings
+ * @param storeActionCreator Redux action creator to call
+ */
+export function importFetchedExchangeRates(
+    rates: IFetchedRates, 
+    currencies: CurrencyInfo[],
+    settings: Settings,
+    storeActionCreator: Function
+): void {
+    const updatedRates: CurrencyInfo[] = currencies.map((c: CurrencyInfo): CurrencyInfo => {
+        if (c.currency !== settings.baseCurrency && c.currency in rates.rates) {
+            const {rate}: IFetchedRate = rates.rates[c.currency];
+            let buyRate: number = applyMargin(rate, settings.marginPct, -1);
+            let sellRate: number = applyMargin(rate, settings.marginPct, 1);
+
+            // If new rates are the same as old ones add/subtract some random to make things look lively
+            if (buyRate === c.buyRate && sellRate === c.sellRate) {
+                const rate2: number = 
+                    rate * (100 + (10 * Math.random() * Math.sign(0.5 - Math.random()))) / 100;
+                buyRate = applyMargin(rate2, settings.marginPct, -1);
+                sellRate = applyMargin(rate2, settings.marginPct, 1);
+            }
+
+            return {...c, buyRate: buyRate, sellRate: sellRate};
+        } else {
+            return c;
+        }
+    });
+    storeActionCreator(updatedRates);
+}
+
+function applyMargin(rate: number, marginPct: number, direction: number) {
+    return Math.round(rate * (1 + direction * marginPct / 200) * 10000) / 10000;
+}
+
+/**
+ * Interface for the fetched JSON object.
+ */
+export interface IFetchedRates {
+    rates: object;
+}
+
+/**
+ * Interface for the rate in the fecthed JSON object.
+ */
+interface IFetchedRate {
+    currency: string;
+    rate: number;
 }

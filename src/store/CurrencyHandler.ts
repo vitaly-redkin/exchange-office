@@ -82,12 +82,12 @@ export type KnownAction =
  * These are functions exposed to UI components that will trigger a state transition.
  */
 export const actionCreators = {
-  UpdateCurrencyAmount: (currency: string, delta: number): AppThunkAction <KnownAction> =>
+  updateCurrencyAmount: (currency: string, delta: number): AppThunkAction <KnownAction> =>
       (dispatch: (action: KnownAction) => void): void => {
     dispatch({ type: ActionTypeEnum.CurrencyUpdateAmount, currency, delta });
   },
 
-  UpdateExchangeRates: (updatedRates: CurrencyInfo[]): AppThunkAction<KnownAction> =>
+  updateExchangeRates: (updatedRates: CurrencyInfo[]): AppThunkAction<KnownAction> =>
       (dispatch: (action: KnownAction) => void): void => {
     dispatch({ type: ActionTypeEnum.CurrencyUpdateExchangeRates, updatedRates });
   },

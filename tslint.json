@@ -50,7 +50,9 @@
     "no-trailing-whitespace": false,
     "prefer-object-spread": false,
     "no-debugger": false,
-    "max-func-body-length": false
+    "max-func-body-length": false,
+    "binary-expression-operand-order": false,
+    "insecure-random": false
   },
   "rulesDirectory": [
     "node_modules/tslint-lines-between-class-members"
