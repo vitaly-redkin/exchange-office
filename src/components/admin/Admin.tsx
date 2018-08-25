@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Container, Row, Col, Button, Form, Alert } from 'reactstrap';
+import { Container, Row, Col, Button, Alert } from 'reactstrap';
 
 import { actionCreators } from '../../store/SettingsHandler';
 import { IApplicationState } from '../../store';
@@ -30,6 +30,8 @@ type AdminProps =
   typeof actionCreators;
 
 class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
+  private formElement: HTMLFormElement;
+
   /**
    * Constructor.
    * 
@@ -48,7 +50,7 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
 
     return (
         <Container className='admin-container mt-4'>
-          <Form>
+          <form ref={this.setFormRef} onSubmit={this.onSubmit}>
             <Row>
               <Col>
                 <h4>Change settings below and click Update</h4>
@@ -68,6 +70,7 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
                   onChange={this.onRateRefreshIntervalChange}
                   min={0}
                   max={999999}
+                  required={true}
                 />
                 seconds
               </Col>
@@ -85,7 +88,8 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
                     onChange={this.onCommissionPctChange}
                     min={0}
                     max={100}
-                  />
+                    required={true}
+                    />
                   %
               </Col>
             </Row>
@@ -102,7 +106,8 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
                     onChange={this.onSurchargeChange}
                     min={0}
                     max={999}
-                  />
+                    required={true}
+                    />
                   {s.baseCurrency}
               </Col>
             </Row>
@@ -119,7 +124,8 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
                     onChange={this.onMinCommissionChange}
                     min={0}
                     max={999}
-                  />
+                    required={true}
+                    />
                   {s.baseCurrency}
               </Col>
             </Row>
@@ -136,20 +142,23 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
                     onChange={this.onMarginPctChange}
                     min={0}
                     max={999}
-                  />
+                    required={true}
+                    />
                   %
               </Col>
             </Row>
             <Row>
               <Col>
                 <hr/>
-                <Button color='primary' onClick={this.onUpdate}>Update</Button>
+                <Button color='primary' disabled={!this.isFormValid()} type='submit'>
+                  Update
+                </Button>
                 {this.state.settingsSaved && 
                  <Alert color='success' className='mt-4'>Settings saved</Alert>
                 }
               </Col>
             </Row>
-          </Form>
+          </form>
         </Container>
     );
   }
@@ -215,11 +224,26 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
   }
 
   /**
-   * Updates settings.
+   * Submit updates settings.
    */
-  private onUpdate = (): void => {
+  private onSubmit = (e: React.FormEvent): void => {
+    e.preventDefault();
     this.props.updateSettings(this.state.settings);
     this.setState({settingsSaved: true});
+  }
+
+  /**
+   * Sets reference to the form element.
+   */
+  private setFormRef = (ref: HTMLFormElement): void => {
+    this.formElement = ref;
+  }
+
+  /**
+   * Returns true if the form is valid.
+   */
+  private isFormValid = (): boolean => {
+    return (!this.formElement || this.formElement.checkValidity());
   }
 }
 

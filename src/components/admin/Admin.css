@@ -8,6 +8,7 @@
   text-align: right;
   border: 1px solid #cccccc;
   padding: 2px;
+  width: 80px;
 }
 
 .admin-container input::-webkit-outer-spin-button,
