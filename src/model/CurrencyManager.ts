@@ -14,12 +14,12 @@ import { Settings } from './Settings';
  * @returns New list with the CurrencyInfo objects
  */
 export function updateAmount(
-    allCurrencies: CurrencyInfo[], 
-    currency: string, 
+    allCurrencies: CurrencyInfo[],
+    currency: string,
     delta: number
 ): CurrencyInfo[] {
-    return allCurrencies.map(c => 
-        (c.currency === currency ? {...c, amount: c.amount + delta} : c)
+    return allCurrencies.map(c =>
+        (c.currency === currency ? { ...c, amount: c.amount + delta } : c)
     );
 }
 
@@ -31,13 +31,13 @@ export function updateAmount(
  * @returns New list with the CurrencyInfo objects
  */
 export function updateExchangeRates(
-    allCurrencies: CurrencyInfo[], 
-    newRates: CurrencyInfo[] 
+    allCurrencies: CurrencyInfo[],
+    newRates: CurrencyInfo[]
 ): CurrencyInfo[] {
     return allCurrencies.map(c => {
         const rates: CurrencyInfo | undefined = newRates.find(r => r.currency === c.currency);
-        
-        return (rates ? {...c, buyRate: rates.buyRate, sellRate: rates.sellRate} : c);
+
+        return (rates ? { ...c, buyRate: rates.buyRate, sellRate: rates.sellRate } : c);
     });
 }
 
@@ -48,7 +48,7 @@ export function updateExchangeRates(
  * @param currency Code of the currency to search by
  */
 export function getCurrencyInfo(
-    allCurrencies: CurrencyInfo[], 
+    allCurrencies: CurrencyInfo[],
     currency: string
 ): CurrencyInfo | undefined {
     return allCurrencies.find(c => c.currency === currency);
@@ -63,14 +63,14 @@ export function getCurrencyInfo(
  * @param storeActionCreator Redux action creator to call
  */
 export function importFetchedExchangeRates(
-    rates: IFetchedRates, 
+    rates: IFetchedRates,
     currencies: CurrencyInfo[],
     settings: Settings,
     storeActionCreator: Function
 ): void {
     const updatedRates: CurrencyInfo[] = currencies.map((c: CurrencyInfo): CurrencyInfo => {
         if (c.currency !== settings.baseCurrency && c.currency in rates.rates) {
-            let {rate}: IFetchedRate = rates.rates[c.currency];
+            let { rate }: IFetchedRate = rates.rates[c.currency];
             rate = Math.round(10000 / rate) / 10000;
             let buyRate: number = applyMargin(rate, settings.marginPct, -1);
             let sellRate: number = applyMargin(rate, settings.marginPct, 1);
@@ -82,7 +82,7 @@ export function importFetchedExchangeRates(
                 sellRate = applyMargin(rate, settings.marginPct, 1);
             }
 
-            return {...c, buyRate: buyRate, sellRate: sellRate};
+            return { ...c, buyRate: buyRate, sellRate: sellRate };
         } else {
             return c;
         }
@@ -107,4 +107,18 @@ export interface IFetchedRates {
 interface IFetchedRate {
     currency: string;
     rate: number;
+}
+
+/**
+ * Interface for transaction description objects.
+ */
+export interface ITransaction {
+    transactionCurrency: string;
+    baseCurrency: string;
+    direction: number;
+    rate: number;
+    amount: number;
+    subtotal: number;
+    commission: number;
+    total: number;
 }

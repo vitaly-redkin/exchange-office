@@ -2,6 +2,7 @@
  * Class to fetch exchange rates.
  */
 
+// URL of the Currex sample rates API
 const API_URL: string = 'https://api.currex.info/v1/json/latest/';
 
 export class RateFetchService {

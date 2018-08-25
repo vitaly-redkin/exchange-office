@@ -11,7 +11,7 @@ import { IApplicationState } from '../../store';
 import { CurrencyInfo } from '../../model/CurrencyInfo';
 import { Settings } from '../../model/Settings';
 import * as CurrencyManager from '../../model/CurrencyManager';
-import { formatRate, formatAmount } from '../../util/Util';
+import { formatAmount } from '../../util/Util';
 import TransactionModal from '../transaction-modal/TransactionModal';
 
 import './Home.css';
@@ -63,11 +63,13 @@ class Home extends React.Component<HomeProps, IHomeState> {
         {this.renderTable()}
 
         <TransactionModal 
-          currencyInfo={transactionCurrency} 
+          transactionCurrencyInfo={transactionCurrency} 
+          baseCurrencyInfo={this.baseCurrencyInfo}
           settings={this.props.settings}
           direction={this.state.transactionDirection}
           isOpen={this.state.inTransaction}
           toggler={this.toggleTransaction}
+          processTransaction={this.processTransaction}
           />
       </Container>
     );
@@ -77,17 +79,19 @@ class Home extends React.Component<HomeProps, IHomeState> {
    * Renders table with currencies.
    */
   private renderTable(): JSX.Element {
+    const baseCurrency: string = this.props.settings.baseCurrency;
+
     return (
       <Container className='home-table-container'>
         <Row className='home-table-header p-2'>
           <Col>Currency</Col>
-          <Col className='text-center'>Buy</Col>
-          <Col className='text-center'>Sell</Col>
+          <Col className='text-center'>Buy ({baseCurrency}) </Col>
+          <Col className='text-center'>Sell ({baseCurrency})</Col>
           <Col className='text-right'>In Stock</Col>
         </Row>
 
         {this.props.currencies.map((c: CurrencyInfo, index: number) => {
-          if (c.currency === this.props.settings.baseCurrency) {
+          if (c.currency === baseCurrency) {
             return null;
           }
 
@@ -106,7 +110,7 @@ class Home extends React.Component<HomeProps, IHomeState> {
                   outline={true} 
                   color='secondary'
                   onClick={() => { this.startTransaction(c, 1); }}>
-                  {formatRate(100 * c.buyRate)}
+                  {formatAmount(100 * c.buyRate)}
                 </Button>
               </Col>
               <Col className='text-center'>
@@ -115,7 +119,7 @@ class Home extends React.Component<HomeProps, IHomeState> {
                   outline={true} 
                   color='secondary'
                   onClick={() => { this.startTransaction(c, -1); }}>
-                  {formatRate(100 * c.sellRate)}
+                  {formatAmount(100 * c.sellRate)}
                 </Button>
               </Col>
               <Col className={`text-right ${amountClass}`}>
@@ -142,12 +146,18 @@ class Home extends React.Component<HomeProps, IHomeState> {
   }
 
   /**
+   * Base currency.
+   */
+  private get baseCurrencyInfo(): CurrencyInfo  {
+    return CurrencyManager.getCurrencyInfo(
+      this.props.currencies, this.props.settings.baseCurrency)!;
+  }
+
+  /**
    * Alert text.
    */
   private get alertText(): JSX.Element {
-    const baseCurrency: string = this.props.settings.baseCurrency;
-    const baseCurrencyInfo: CurrencyInfo = CurrencyManager.getCurrencyInfo(
-      this.props.currencies, baseCurrency)!;
+    const baseCurrencyInfo: CurrencyInfo = this.baseCurrencyInfo;
     const amount: number = baseCurrencyInfo.amount;
     const amountClass: string = (
       amount < baseCurrencyInfo.warningThresholdAmount ? 'home-currency-amount-warning' : ''
@@ -161,7 +171,9 @@ class Home extends React.Component<HomeProps, IHomeState> {
           'Exchange rates has not been updated yet.'
         }
         &nbsp;
-        <span className={amountClass}>{`We have ${formatAmount(amount)} ${baseCurrency} left.`}</span>
+        <span className={amountClass}>
+          {`We have ${formatAmount(amount)} ${baseCurrencyInfo.currency} left.`}
+        </span>
       </div>
     );
   }
@@ -171,7 +183,7 @@ class Home extends React.Component<HomeProps, IHomeState> {
    */
   private toggleTransaction = (): void => {
     this.setState((prevState: IHomeState) => { 
-      this.setState({inTransaction: !prevState.inTransaction}); 
+      return {inTransaction: !prevState.inTransaction}; 
     });
   }
 
@@ -201,16 +213,24 @@ class Home extends React.Component<HomeProps, IHomeState> {
   private getCurrencyInfo = (currency: string): CurrencyInfo => {
     return CurrencyManager.getCurrencyInfo(this.props.currencies, currency)!;
   }
+
+  /**
+   * Processes currency exchange transaction.
+   */
+  private processTransaction = (t: CurrencyManager.ITransaction): void => {
+    this.props.updateCurrencyAmount(t.transactionCurrency, t.direction * t.amount);
+    this.props.updateCurrencyAmount(t.baseCurrency, -t.direction * t.total);
+  }
 }
 
 // Redux mapStateToProps function
 function mapStateToProps(state: IApplicationState): IHomeOwnProps {
   return {
-      currencies: state.currencies.currencies, 
-      lastUpdatedAt: state.currencies.lastUpdatedAt,
-      lastError: state.currencies.lastError,
-      settings: state.settings.settings,
-    };
+    currencies: state.currencies.currencies, 
+    lastUpdatedAt: state.currencies.lastUpdatedAt,
+    lastError: state.currencies.lastError,
+    settings: state.settings.settings,
+  };
 }
 
 // Redux-Wrapped component

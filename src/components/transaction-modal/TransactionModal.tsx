@@ -1,5 +1,5 @@
 /**
- * The Transaction modal component.
+ * The Transaction Msodal component.
  */
 
 import * as React from 'react';
@@ -7,17 +7,20 @@ import { Modal, ModalHeader, ModalBody, ModalFooter,  Row, Col, Button } from 'r
 
 import { Settings } from '../../model/Settings';
 import { CurrencyInfo } from '../../model/CurrencyInfo';
+import { ITransaction } from '../../model/CurrencyManager';
 import { asFloat, formatAmount, formatRate } from '../../util/Util';
 
 import './TransactionModal.css';
 
 // Component own properties interface
 interface ITransactionModalProps {
-    currencyInfo: CurrencyInfo;
+    transactionCurrencyInfo: CurrencyInfo;
+    baseCurrencyInfo: CurrencyInfo;
     settings: Settings;
     direction: number;
     isOpen: boolean;
     toggler: Function;
+    processTransaction: Function;
 }
 
 // Component own state interface
@@ -27,6 +30,7 @@ interface ITransactionModalState {
 
 class TransactionModal extends React.PureComponent<ITransactionModalProps, ITransactionModalState> {
   private formElement: HTMLFormElement;
+  private amountInputElement: HTMLInputElement;
 
   /**
    * Constructor.
@@ -39,97 +43,100 @@ class TransactionModal extends React.PureComponent<ITransactionModalProps, ITran
   }
 
   /**
+   * Called when component properties are updated.
+   * 
+   * @param prevProps previos component properties
+   */
+  public componentDidUpdate(prevProps: ITransactionModalProps): void {
+    if (this.props.isOpen) {
+      this.amountInputElement.focus();
+    }
+  }
+
+  /**
    * Rendering method.
    */
   public render(): JSX.Element {
-    const amount: number = this.state.amount;
     const p: ITransactionModalProps = this.props;
-    const c = p.currencyInfo;
+    const c = p.transactionCurrencyInfo;
     const s: Settings = p.settings;
-    const rate: number = (p.direction === 1 ? c.buyRate : c.sellRate);
-    const baseAmount = (p.direction === 1 ? amount * rate : amount);
-    const subtotal: number = Math.round(amount * rate * 100) / 100;
-    const baseCommission: number = Math.max(
-      s.surcharge + baseAmount * s.commissionPct / 100,
-      s.minCommission
-     );
-    const commission: number = Math.round(
-      (p.direction === 1 ? baseCommission / rate : baseCommission) * 100) / 100;
-    const total: number = subtotal + commission;
+    const t: ITransaction = this.composeTransaction();
 
     return (
-      <form ref={this.setFormRef} onSubmit={this.onSubmit}>
-        <Modal 
-          isOpen={p.isOpen} 
-          fade={false} 
-          toggle={this.toggler} 
-          className='transaction-modal'
-          centered={true}
-          autoFocus={true}
-        >
+      <Modal 
+        isOpen={p.isOpen} 
+        fade={false} 
+        toggle={this.toggler} 
+        className='transaction-modal'
+        centered={true}
+        autoFocus={true}
+      >
+        <form ref={this.setFormRef} onSubmit={this.onSubmit}>
           <ModalHeader toggle={this.toggler}>
             {this.title}
           </ModalHeader>
 
           <ModalBody>
-              <Row>
-                <Col>
-                  <label htmlFor='amountInput'>{this.amountLabel}:</label>
-                </Col>
-                <Col className='text-right'>
-                  <input
-                    id='surchargeInput'
-                    className='mr-2'
-                    type='number'
-                    onChange={this.onAmountChange}
-                    min={1}
-                    max={this.maxAmount}
-                    required={true}
-                    />
-                    {c.currency}
-                </Col>
-              </Row>
+            <Row className='transaction-total-row'>
+              <Col>
+                <label htmlFor='amountInput'>{this.amountLabel}:</label>
+              </Col>
+              <Col className='text-right'>
+                <input
+                  id='surchargeInput'
+                  className='mr-2'
+                  type='number'
+                  ref={this.setAmountInputRef}
+                  onChange={this.onAmountChange}
+                  min={1}
+                  max={this.maxAmount}
+                  step={0.01}
+                  required={true}
+                  />
+                  {c.currency}
+              </Col>
+            </Row>
 
-              <Row><Col colSpan={2}><hr/></Col></Row>
+            <Row><Col colSpan={2}><hr/></Col></Row>
 
-              <Row>
-                <Col>Exchange Rate:</Col>
-                <Col className='text-right'>
-                  1.00&nbsp;{c.currency}
-                  &nbsp;=&nbsp;
-                  {formatRate(rate)}
-                  &nbsp;
-                  {s.baseCurrency}
-                </Col>
-              </Row>
-              <Row>
-                <Col>Subtotal:</Col>
-                <Col className='text-right'>
-                  {formatAmount(subtotal)}
-                  &nbsp;
-                  {s.baseCurrency}
-                </Col>
-              </Row>
+            <Row>
+              <Col>Exchange Rate:</Col>
+              <Col className='text-right'>
+                1.00&nbsp;{c.currency}
+                &nbsp;=&nbsp;
+                {formatRate(t.rate)}
+                &nbsp;
+                {s.baseCurrency}
+              </Col>
+            </Row>
+            <Row>
+              <Col>Subtotal:</Col>
+              <Col className='text-right'>
+                {formatAmount(t.subtotal)}
+                &nbsp;
+                {s.baseCurrency}
+              </Col>
+            </Row>
 
-              <Row>
-                <Col>Commission:</Col>
-                <Col className='text-right'>
-                  {formatAmount(commission)}
-                  &nbsp;
-                  {s.baseCurrency}
-                </Col>
-              </Row>
+            <Row>
+              <Col>Commission:</Col>
+              <Col className='text-right'>
+                {formatAmount(t.commission)}
+                &nbsp;
+                {s.baseCurrency}
+              </Col>
+            </Row>
 
-              <Row><Col colSpan={2}><hr/></Col></Row>
+            <Row><Col colSpan={2}><hr/></Col></Row>
 
-              <Row className='transaction-total-row'>
-                <Col>Total:</Col>
-                <Col className='text-right'>
-                  {formatAmount(total)}
-                  &nbsp;
-                  {s.baseCurrency}
-                </Col>
-              </Row>
+            <Row className='transaction-total-row'>
+              <Col>Total:</Col>
+              <Col className='text-right'>
+                {formatAmount(t.total)}
+                &nbsp;
+                {s.baseCurrency}
+              </Col>
+            </Row>
           </ModalBody>
 
           <ModalFooter>
@@ -137,6 +144,7 @@ class TransactionModal extends React.PureComponent<ITransactionModalProps, ITran
               Cancel
             </Button>
             <Button 
+              type='submit'
               color='primary' 
               className='transaction-button'
               onClick={this.onSubmit} 
@@ -144,8 +152,8 @@ class TransactionModal extends React.PureComponent<ITransactionModalProps, ITran
               {this.submitButtonCaption}
             </Button>
           </ModalFooter>
-        </Modal>
-      </form>
+        </form>
+      </Modal>
     );
   }
 
@@ -153,14 +161,14 @@ class TransactionModal extends React.PureComponent<ITransactionModalProps, ITran
    * Modal title.
    */
   private get title(): string {
-    return `${this.props.direction === 1 ? 'Buy' : 'Sell'} ${this.props.currencyInfo.currency}`;
+    return `${this.props.direction === 1 ? 'Buy' : 'Sell'} ${this.props.transactionCurrencyInfo.currency}`;
   }
 
   /**
    * Label for the amount input.
    */
   private get amountLabel(): string {
-    return `Amount to ${this.props.direction === 1 ? 'Buy' : 'Sell'}`;
+    return `Amount to ${this.props.direction === 1 ? 'buy' : 'sell'}`;
   }
 
   /**
@@ -175,9 +183,10 @@ class TransactionModal extends React.PureComponent<ITransactionModalProps, ITran
    */
   private get maxAmount(): number {
     if (this.props.direction === 1) {
-      return Math.floor(this.props.currencyInfo.amount * this.props.currencyInfo.buyRate * 100) / 100;
+      return Math.floor(
+        this.props.baseCurrencyInfo.amount / this.props.transactionCurrencyInfo.buyRate);
     } else {
-      return this.props.currencyInfo.amount;
+      return this.props.transactionCurrencyInfo.amount;
     }
   }
 
@@ -206,6 +215,13 @@ class TransactionModal extends React.PureComponent<ITransactionModalProps, ITran
    */
   private onSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
+    if (!this.isFormValid()) {
+      return;
+    }
+
+    const t: ITransaction = this.composeTransaction();
+    this.props.processTransaction(t);
+    this.props.toggler();
   }
 
   /**
@@ -216,10 +232,51 @@ class TransactionModal extends React.PureComponent<ITransactionModalProps, ITran
   }
 
   /**
+   * Sets reference to the amount input element.
+   */
+  private setAmountInputRef = (ref: HTMLInputElement): void => {
+    this.amountInputElement = ref;
+  }
+
+  /**
    * Returns true if the form is valid.
    */
   private isFormValid = (): boolean => {
-    return (!this.formElement || this.formElement.checkValidity());
+    const isHtmlValid: boolean = (!this.formElement || this.formElement.checkValidity());
+    
+    const t: ITransaction = this.composeTransaction();
+    const isAmountValid: boolean = 
+      (t.amount >= 1 && t.amount <= this.maxAmount && t.total > 0);
+
+    return (isHtmlValid && isAmountValid);
+  }
+
+  /**
+   * Composes transaction description object.
+   */
+  private composeTransaction = (): ITransaction => {
+    const amount: number = this.state.amount;
+    const p: ITransactionModalProps = this.props;
+    const c = p.transactionCurrencyInfo;
+    const s: Settings = p.settings;
+    const rate: number = (p.direction === 1 ? c.buyRate : c.sellRate);
+    const subtotal: number = Math.round(amount * rate * 100) / 100;
+    const commission: number = Math.round(Math.max(
+      s.surcharge + subtotal * s.commissionPct / 100,
+      s.minCommission
+    ) * 100) / 100;
+    const total: number = subtotal - p.direction * commission;
+
+    return {
+      transactionCurrency: c.currency,
+      baseCurrency: p.baseCurrencyInfo.currency,
+      direction: p.direction,
+      rate: rate,
+      amount: amount,
+      subtotal: subtotal,
+      commission: commission,
+      total: total
+    };
   }
 }
 

@@ -88,6 +88,7 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
                     onChange={this.onCommissionPctChange}
                     min={0}
                     max={100}
+                    step={0.01}
                     required={true}
                     />
                   %
@@ -106,6 +107,7 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
                     onChange={this.onSurchargeChange}
                     min={0}
                     max={999}
+                    step={0.01}
                     required={true}
                     />
                   {s.baseCurrency}
@@ -124,6 +126,7 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
                     onChange={this.onMinCommissionChange}
                     min={0}
                     max={999}
+                    step={0.01}
                     required={true}
                     />
                   {s.baseCurrency}
@@ -142,6 +145,7 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
                     onChange={this.onMarginPctChange}
                     min={0}
                     max={999}
+                    step={0.01}
                     required={true}
                     />
                   %
@@ -228,6 +232,10 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
    */
   private onSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
+    if (!this.isFormValid()) {
+      return;
+    }
+    
     this.props.updateSettings(this.state.settings);
     this.setState({settingsSaved: true});
   }
@@ -250,8 +258,8 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
 // Redux mapStateToProps function
 function mapStateToProps(state: IApplicationState): IAdminOwnProps {
   return {
-      settings: state.settings.settings,
-    };
+    settings: state.settings.settings,
+  };
 }
 
 // Redux-Wrapped component

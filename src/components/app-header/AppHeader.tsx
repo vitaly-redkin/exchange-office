@@ -1,6 +1,7 @@
 /**
  * Application header component.
  */
+
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter, NavLink } from 'react-router-dom';
@@ -55,16 +56,26 @@ class AppHeader extends React.Component<AppHeaderProps, IAppHeaderState> {
    */
   public componentDidMount(): void {
     this.refreshRates();
+    this.startRateRefresh();
+  }
 
-    this.refreshRatesInterval = window.setInterval(
-      this.refreshRates, this.props.settings.rateRefreshInterval * 1000);
+  /**
+   * Called when component properties are updated.
+   * 
+   * @param prevProps previos component properties
+   */
+  public componentDidUpdate(prevProps: AppHeaderProps): void {
+    if (this.props.settings.rateRefreshInterval !== prevProps.settings.rateRefreshInterval) {
+      this.stopRateRefresh();
+      this.startRateRefresh();
+    }
   }
 
   /**
    * Called when components is about to be unmounted.
    */
   public componentWillUnmount() {
-    this.clearInterval();
+    this.stopRateRefresh();
   }
 
   /**
@@ -130,11 +141,21 @@ class AppHeader extends React.Component<AppHeaderProps, IAppHeaderState> {
     console.log(error);
     this.props.setError(error);
   }
+  
+  /**
+   * Starts rates refresh.
+   */
+  private startRateRefresh = () => {
+    const interval: number = this.props.settings.rateRefreshInterval;
+    if (interval > 0) {
+      this.refreshRatesInterval = window.setInterval(this.refreshRates, interval * 1000);
+    }
+  }
 
   /**
-   * Clears timer interval.
+   * Stops rates refresh.
    */
-  private clearInterval = () => {
+  private stopRateRefresh = () => {
     if (this.refreshRatesInterval !== undefined) {
       window.clearInterval(this.refreshRatesInterval);
       this.refreshRatesInterval = undefined;

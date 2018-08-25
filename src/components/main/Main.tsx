@@ -17,7 +17,7 @@ export class Main extends React.PureComponent<RouteComponentProps<IDummyProps>> 
   public render(): JSX.Element {
     return (
       <div>
-        <div className='app-header-contaner'>
+        <div>
           <AppHeader />
         </div>
         <div className='pt-4'>
