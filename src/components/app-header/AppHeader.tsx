@@ -179,4 +179,4 @@ function mapStateToProps(state: IApplicationState): IAppHeaderOwnProps {
 }
 
 // Redux-and-Router Wrapped component
-export default connect(mapStateToProps, actionCreators)(withRouter(AppHeader));
+export default withRouter(connect(mapStateToProps, actionCreators)(AppHeader));
