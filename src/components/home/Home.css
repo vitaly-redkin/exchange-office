@@ -22,12 +22,24 @@
   padding-right: 5px;
 }
 
-.home-table-row-odd
+.home-table-row-even
 {
   background-color: #eeeeee;
+}
+
+.home-table-row-even,
+.home-table-row-odd
+{
+  align-items: center;
 }
 
 .home-table-currency
 {
   font-weight: bold;
+}
+
+.home-table-button
+{
+  width: 100px;
+  color: black!important;
 }

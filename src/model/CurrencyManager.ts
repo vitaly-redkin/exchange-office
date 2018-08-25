@@ -70,16 +70,16 @@ export function importFetchedExchangeRates(
 ): void {
     const updatedRates: CurrencyInfo[] = currencies.map((c: CurrencyInfo): CurrencyInfo => {
         if (c.currency !== settings.baseCurrency && c.currency in rates.rates) {
-            const {rate}: IFetchedRate = rates.rates[c.currency];
+            let {rate}: IFetchedRate = rates.rates[c.currency];
+            rate = Math.round(10000 / rate) / 10000;
             let buyRate: number = applyMargin(rate, settings.marginPct, -1);
             let sellRate: number = applyMargin(rate, settings.marginPct, 1);
 
             // If new rates are the same as old ones add/subtract some random to make things look lively
             if (buyRate === c.buyRate && sellRate === c.sellRate) {
-                const rate2: number = 
-                    rate * (100 + (10 * Math.random() * Math.sign(0.5 - Math.random()))) / 100;
-                buyRate = applyMargin(rate2, settings.marginPct, -1);
-                sellRate = applyMargin(rate2, settings.marginPct, 1);
+                rate *= (100 + (10 * Math.random() * Math.sign(0.5 - Math.random()))) / 100;
+                buyRate = applyMargin(rate, settings.marginPct, -1);
+                sellRate = applyMargin(rate, settings.marginPct, 1);
             }
 
             return {...c, buyRate: buyRate, sellRate: sellRate};

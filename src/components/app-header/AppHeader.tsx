@@ -107,7 +107,6 @@ class AppHeader extends React.Component<AppHeaderProps, IAppHeaderState> {
    * Reftesh exchange rates.
    */
   private refreshRates = () => {
-    console.log('Refreshing');
     new RateFetchService().fetchRates(
       this.props.settings.baseCurrency,
       this.setRates,

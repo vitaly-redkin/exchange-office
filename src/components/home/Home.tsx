@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Container, Row, Col, Alert } from 'reactstrap';
+import { Container, Row, Col, Alert, Button } from 'reactstrap';
 
 import { actionCreators } from '../../store/CurrencyHandler';
 import { IApplicationState } from '../../store';
@@ -12,6 +12,7 @@ import { CurrencyInfo } from '../../model/CurrencyInfo';
 import { Settings } from '../../model/Settings';
 import * as CurrencyManager from '../../model/CurrencyManager';
 import { formatRate, formatAmount } from '../../util/Util';
+import TransactionModal from '../transaction-modal/TransactionModal';
 
 import './Home.css';
 
@@ -28,11 +29,31 @@ type HomeProps =
   IHomeOwnProps & 
   typeof actionCreators;
 
-class Home extends React.PureComponent<HomeProps> {
+// Interface for the component state
+interface IHomeState {
+  transactionCurrency: string;
+  transactionDirection: number;
+  inTransaction: boolean;
+}  
+
+class Home extends React.Component<HomeProps, IHomeState> {
+  constructor(props: HomeProps) {
+    super(props);
+
+    this.state = {
+      transactionCurrency: this.props.settings.baseCurrency,
+      transactionDirection: 1,
+      inTransaction: false
+    };
+  }
+
   /**
    * Renders component.
    */
   public render(): JSX.Element {
+    const transactionCurrency: CurrencyInfo = 
+      this.getCurrencyInfo(this.state.transactionCurrency);
+      
     return (
       <Container className='home-container mt-1'>
         <Alert color={this.alertColor} className='text-center mb-4'>
@@ -40,6 +61,14 @@ class Home extends React.PureComponent<HomeProps> {
         </Alert>
 
         {this.renderTable()}
+
+        <TransactionModal 
+          currencyInfo={transactionCurrency} 
+          settings={this.props.settings}
+          direction={this.state.transactionDirection}
+          isOpen={this.state.inTransaction}
+          toggler={this.toggleTransaction}
+          />
       </Container>
     );
   }
@@ -52,8 +81,8 @@ class Home extends React.PureComponent<HomeProps> {
       <Container className='home-table-container'>
         <Row className='home-table-header p-2'>
           <Col>Currency</Col>
-          <Col className='text-right'>Buy</Col>
-          <Col className='text-right'>Sell</Col>
+          <Col className='text-center'>Buy</Col>
+          <Col className='text-center'>Sell</Col>
           <Col className='text-right'>In Stock</Col>
         </Row>
 
@@ -65,14 +94,30 @@ class Home extends React.PureComponent<HomeProps> {
           const rowClassName: string = 
             (index % 2 === 0 ? 'home-table-row-even' : 'home-table-row-odd');
           const amountClass: string = (
-              c.amount < c.warningThresholdAmount ? 'home-currency-amount-warning' : ''
+            c.amount < c.warningThresholdAmount ? 'home-currency-amount-warning' : ''
             );
         
           return (
             <Row className={`${rowClassName} p-2`} key={c.currency}>
-              <Col className='home-table-currency'>{c.currency}</Col>
-              <Col className='text-right'>{formatRate(c.buyRate)}</Col>
-              <Col className='text-right'>{formatRate(c.sellRate)}</Col>
+              <Col className='home-table-currency'>{`100 ${c.currency}`}</Col>
+              <Col className='text-center'>
+                <Button 
+                  className='home-table-button'
+                  outline={true} 
+                  color='secondary'
+                  onClick={() => { this.startTransaction(c, 1); }}>
+                  {formatRate(100 * c.buyRate)}
+                </Button>
+              </Col>
+              <Col className='text-center'>
+                <Button 
+                  className='home-table-button'
+                  outline={true} 
+                  color='secondary'
+                  onClick={() => { this.startTransaction(c, -1); }}>
+                  {formatRate(100 * c.sellRate)}
+                </Button>
+              </Col>
               <Col className={`text-right ${amountClass}`}>
                 {formatAmount(c.amount)}
               </Col>
@@ -119,6 +164,42 @@ class Home extends React.PureComponent<HomeProps> {
         <span className={amountClass}>{`We have ${formatAmount(amount)} ${baseCurrency} left.`}</span>
       </div>
     );
+  }
+
+  /**
+   * Toggles transaction modal.
+   */
+  private toggleTransaction = (): void => {
+    this.setState((prevState: IHomeState) => { 
+      this.setState({inTransaction: !prevState.inTransaction}); 
+    });
+  }
+
+  /**
+   * Starts transaction.
+   * 
+   * @param currencyInfo Currency to deal with
+   * @param direction 1 to buy currency, -1 to sell it
+   */
+  private startTransaction = (
+    currencyInfo: CurrencyInfo,
+    direction: number
+  ): void => {
+    this.setState({
+        inTransaction: true,
+        transactionCurrency: currencyInfo.currency,
+        transactionDirection: direction
+      } 
+    );
+  }
+
+  /**
+   * Returns currebcy info object.
+   * 
+   * @param currency Currency code to find by
+   */
+  private getCurrencyInfo = (currency: string): CurrencyInfo => {
+    return CurrencyManager.getCurrencyInfo(this.props.currencies, currency)!;
   }
 }
 
