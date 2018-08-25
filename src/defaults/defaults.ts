@@ -12,43 +12,50 @@ export const defaultCurrencies: CurrencyInfo[] = [
         currency: 'USD',
         buyRate: 1,
         sellRate: 1,
-        amount: 10000
+        amount: 10000,
+        warningThresholdAmount: 2500
     },
     {
         currency: 'EUR',
         buyRate: 1.14,
         sellRate: 1.15,
-        amount: 1000
+        amount: 1000,
+        warningThresholdAmount: 250
     },
     {
         currency: 'GBP',
         buyRate: 1.3,
         sellRate: 1.35,
-        amount: 1000
+        amount: 1000,
+        warningThresholdAmount: 250
     },
     {
         currency: 'CAD',
         buyRate: 0.8,
         sellRate: 0.9,
-        amount: 1000
+        amount: 1000,
+        warningThresholdAmount: 250
     },
     {
         currency: 'AUD',
         buyRate: 0.85,
         sellRate: 0.95,
-        amount: 1000
+        amount: 1000,
+        warningThresholdAmount: 250
     },
     {
         currency: 'CNY',
         buyRate: 6,
         sellRate: 7,
-        amount: 1000
+        amount: 1000,
+        warningThresholdAmount: 250
     },
     {
         currency: 'SGD',
         buyRate: 0.65,
         sellRate: 0.75,
-        amount: 1000
+        amount: 1000,
+        warningThresholdAmount: 250
     }
 ];
 

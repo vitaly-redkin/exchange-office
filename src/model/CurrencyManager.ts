@@ -8,7 +8,7 @@ import { CurrencyInfo } from './CurrencyInfo';
  * Updates the given currency amount.
  * 
  * @param allCurrencies list of all CurrencyInfo objects to update
- * @param currency Code of the currency to upate
+ * @param currency Code of the currency to update
  * @param delta Amount to update the existing currency amount by
  * @returns New list with the CurrencyInfo objects
  */
@@ -38,4 +38,17 @@ export function updateExchangeRates(
         
         return (rates ? {...c, buyRate: rates.buyRate, sellRate: rates.sellRate} : c);
     });
+}
+
+/**
+ * Finds CurrencyInfo object by the currency code.
+ * 
+ * @param allCurrencies list of all CurrencyInfo objects to search in
+ * @param currency Code of the currency to search by
+ */
+export function getCurrencyInfo(
+    allCurrencies: CurrencyInfo[], 
+    currency: string
+): CurrencyInfo | undefined {
+    return allCurrencies.find(c => c.currency === currency);
 }

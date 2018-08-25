@@ -9,7 +9,7 @@ import { Container, Row, Col, Button, Alert } from 'reactstrap';
 import { actionCreators } from '../../store/SettingsHandler';
 import { IApplicationState } from '../../store';
 import { Settings } from '../../model/Settings';
-import { asInt, asFloat } from '../../util/Util';
+import { asInt, asFloat, formatAmount } from '../../util/Util';
 
 import './Admin.css';
 
@@ -102,7 +102,7 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
                     id='surchargeInput'
                     className='mr-2'
                     type='number'
-                    defaultValue={s.surcharge.toPrecision(3)}
+                    defaultValue={formatAmount(s.surcharge)}
                     onChange={this.onSurchargeChange}
                     min={0}
                     max={999}
@@ -120,7 +120,7 @@ class Admin extends React.PureComponent<AdminProps, IAdminOwnState> {
                     id='minCommissionInput'
                     className='mr-2'
                     type='number'
-                    defaultValue={s.minCommission.toPrecision(3)}
+                    defaultValue={formatAmount(s.minCommission)}
                     onChange={this.onMinCommissionChange}
                     min={0}
                     max={999}
