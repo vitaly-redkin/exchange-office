@@ -3,7 +3,7 @@
  */
 
 // URL of the Currex sample rates API
-const API_URL: string = 'https://api.currex.info/v1/json/latest/';
+const API_URL: string = 'http://www.apilayer.net/api/live?access_key=4857c8b186698a428f180cda8420271a&format=1';
 
 export class RateFetchService {
   /**
@@ -18,7 +18,7 @@ export class RateFetchService {
       onSuccess: Function,
       onError: Function
     ): void {
-      const url: string = `${API_URL}${currency}`;
+      const url: string = `${API_URL}&source=${currency}`;
       try {
           fetch(
               url,
