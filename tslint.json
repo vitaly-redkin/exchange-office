@@ -52,7 +52,8 @@
     "no-debugger": false,
     "max-func-body-length": false,
     "binary-expression-operand-order": false,
-    "insecure-random": false
+    "insecure-random": false,
+    "no-http-string": false
   },
   "rulesDirectory": [
     "node_modules/tslint-lines-between-class-members"

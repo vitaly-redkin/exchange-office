@@ -69,8 +69,9 @@ export function importFetchedExchangeRates(
     storeActionCreator: Function
 ): void {
     const updatedRates: CurrencyInfo[] = currencies.map((c: CurrencyInfo): CurrencyInfo => {
-        if (c.currency !== settings.baseCurrency && c.currency in rates.rates) {
-            let { rate }: IFetchedRate = rates.rates[c.currency];
+        const rateCode: string = `${settings.baseCurrency}${c.currency}`;
+        if (c.currency !== settings.baseCurrency && rateCode in rates.quotes) {
+            let rate: number = rates.quotes[rateCode];
             rate = Math.round(10000 / rate) / 10000;
             let buyRate: number = applyMargin(rate, settings.marginPct, -1);
             let sellRate: number = applyMargin(rate, settings.marginPct, 1);
@@ -98,15 +99,7 @@ function applyMargin(rate: number, marginPct: number, direction: number) {
  * Interface for the fetched JSON object.
  */
 export interface IFetchedRates {
-    rates: object;
-}
-
-/**
- * Interface for the rate in the fecthed JSON object.
- */
-interface IFetchedRate {
-    currency: string;
-    rate: number;
+    quotes: object;
 }
 
 /**
